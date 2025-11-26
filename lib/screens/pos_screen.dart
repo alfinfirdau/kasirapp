@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/payment_dialog.dart';
+import '../widgets/receipt_dialog.dart';
 
 class POSScreen extends StatefulWidget {
   const POSScreen({super.key});
@@ -7,14 +9,48 @@ class POSScreen extends StatefulWidget {
   State<POSScreen> createState() => _POSScreenState();
 }
 
-class _POSScreenState extends State<POSScreen> {
+class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> _cartItems = [];
   double _total = 0;
+  late AnimationController _fabAnimationController;
+  late Animation<double> _fabScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fabAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _fabScaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _fabAnimationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _fabAnimationController.dispose();
+    super.dispose();
+  }
 
   void _addToCart(String product, double price) {
     setState(() {
-      _cartItems.add({'name': product, 'price': price, 'quantity': 1});
-      _total += price;
+      // Check if item already exists
+      final existingIndex = _cartItems.indexWhere(
+        (item) => item['name'] == product,
+      );
+      if (existingIndex != -1) {
+        _cartItems[existingIndex]['quantity'] += 1;
+        _total += price;
+      } else {
+        _cartItems.add({'name': product, 'price': price, 'quantity': 1});
+        _total += price;
+      }
+    });
+
+    // Animate FAB when item is added
+    _fabAnimationController.forward().then((_) {
+      _fabAnimationController.reverse();
     });
   }
 
@@ -23,6 +59,44 @@ class _POSScreenState extends State<POSScreen> {
       _total -= _cartItems[index]['price'] * _cartItems[index]['quantity'];
       _cartItems.removeAt(index);
     });
+  }
+
+  void _showPaymentDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PaymentDialog(
+        total: _total,
+        cartItems: _cartItems,
+        onPaymentComplete: _onPaymentComplete,
+      ),
+    );
+  }
+
+  void _onPaymentComplete(String paymentMethod) {
+    final transactionId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
+
+    // Store cart data before clearing
+    final cartSnapshot = List<Map<String, dynamic>>.from(_cartItems);
+    final totalSnapshot = _total;
+
+    // Clear cart
+    setState(() {
+      _cartItems.clear();
+      _total = 0;
+    });
+
+    // Show receipt
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ReceiptDialog(
+        cartItems: cartSnapshot,
+        total: totalSnapshot,
+        paymentMethod: paymentMethod,
+        transactionId: transactionId,
+      ),
+    );
   }
 
   @override
@@ -321,24 +395,50 @@ class _POSScreenState extends State<POSScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: ElevatedButton(
-                              onPressed: _cartItems.isEmpty ? null : () {},
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          AnimatedBuilder(
+                            animation: _fabScaleAnimation,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _fabScaleAnimation.value,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: _cartItems.isEmpty
+                                        ? null
+                                        : _showPaymentDialog,
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      backgroundColor: _cartItems.isEmpty
+                                          ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.1)
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                      foregroundColor: _cartItems.isEmpty
+                                          ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.5)
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
+                                    ),
+                                    child: Text(
+                                      'Bayar - Rp ${_total.toStringAsFixed(0)}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: const Text(
-                                'Bayar',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                         ],
                       ),
