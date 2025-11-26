@@ -312,7 +312,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      // Edit product functionality
+                                      // For now, show a message that edit functionality is coming soon
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: const Text(
+                                            'Fitur edit produk akan segera hadir',
+                                          ),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                        ),
+                                      );
                                     },
                                     icon: const Icon(Icons.edit),
                                     color: Theme.of(
