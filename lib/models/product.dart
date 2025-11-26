@@ -137,7 +137,7 @@ class ProductData {
         description: 'Sate ayam dengan bumbu kacang dan lontong',
         price: 30000,
         imageUrl:
-            'https://images.unsplash.com/photo-1529563021893-cc83c261f7e7?w=400',
+            'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400',
         category: 'Makanan',
         stock: 20,
       ),
@@ -157,7 +157,7 @@ class ProductData {
         description: 'Mie goreng dengan bumbu khas Jawa',
         price: 20000,
         imageUrl:
-            'https://images.unsplash.com/photo-1585032226651-759b2dddedb0?w=400',
+            'https://images.unsplash.com/photo-1551782450-17144efb5723?w=400',
         category: 'Makanan',
         stock: 18,
       ),
@@ -230,6 +230,106 @@ class ProductData {
             'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
         category: 'Makanan',
         stock: 14,
+      ),
+      Product.dummy(
+        id: '13',
+        name: 'Rendang Daging',
+        description: 'Rendang daging sapi khas Padang dengan bumbu rempah',
+        price: 45000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400',
+        category: 'Makanan',
+        stock: 10,
+      ),
+      Product.dummy(
+        id: '14',
+        name: 'Soto Ayam',
+        description: 'Soto ayam dengan kuah kuning dan nasi',
+        price: 25000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400',
+        category: 'Makanan',
+        stock: 15,
+      ),
+      Product.dummy(
+        id: '15',
+        name: 'Gado-Gado',
+        description: 'Gado-gado dengan bumbu kacang dan lontong',
+        price: 22000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1551782450-17144efb5723?w=400',
+        category: 'Makanan',
+        stock: 12,
+      ),
+      Product.dummy(
+        id: '16',
+        name: 'Ayam Goreng',
+        description: 'Ayam goreng crispy dengan sambal',
+        price: 28000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400',
+        category: 'Makanan',
+        stock: 18,
+      ),
+      Product.dummy(
+        id: '17',
+        name: 'Teh Tarik',
+        description: 'Teh tarik manis hangat khas Malaysia',
+        price: 10000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1499638673689-79a0b5115d87?w=400',
+        category: 'Minuman',
+        stock: 25,
+      ),
+      Product.dummy(
+        id: '18',
+        name: 'Jus Alpukat',
+        description: 'Jus alpukat segar dengan susu',
+        price: 15000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400',
+        category: 'Minuman',
+        stock: 20,
+      ),
+      Product.dummy(
+        id: '19',
+        name: 'Wedang Jahe',
+        description: 'Minuman jahe hangat dengan rempah',
+        price: 8000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=400',
+        category: 'Minuman',
+        stock: 30,
+      ),
+      Product.dummy(
+        id: '20',
+        name: 'Pisang Goreng',
+        description: 'Pisang goreng renyah dengan coklat',
+        price: 12000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400',
+        category: 'Snack',
+        stock: 22,
+      ),
+      Product.dummy(
+        id: '21',
+        name: 'Martabak Manis',
+        description: 'Martabak manis dengan topping coklat dan keju',
+        price: 30000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400',
+        category: 'Snack',
+        stock: 8,
+      ),
+      Product.dummy(
+        id: '22',
+        name: 'Keripik Singkong',
+        description: 'Keripik singkong gurih dan renyah',
+        price: 10000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400',
+        category: 'Snack',
+        stock: 35,
       ),
     ];
   }
