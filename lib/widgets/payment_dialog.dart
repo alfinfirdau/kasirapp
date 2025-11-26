@@ -19,7 +19,7 @@ class PaymentMethod {
 class PaymentDialog extends StatefulWidget {
   final double total;
   final List<Map<String, dynamic>> cartItems;
-  final Function(String) onPaymentComplete;
+  final Function(String, double, double) onPaymentComplete;
 
   const PaymentDialog({
     super.key,
@@ -38,6 +38,9 @@ class _PaymentDialogState extends State<PaymentDialog>
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   String? _selectedPaymentMethod;
+  final TextEditingController _cashController = TextEditingController();
+  double _paidAmount = 0.0;
+  double _change = 0.0;
 
   final List<PaymentMethod> _paymentMethods = [
     const PaymentMethod(
@@ -112,6 +115,7 @@ class _PaymentDialogState extends State<PaymentDialog>
   @override
   void dispose() {
     _animationController.dispose();
+    _cashController.dispose();
     super.dispose();
   }
 
@@ -120,11 +124,38 @@ class _PaymentDialogState extends State<PaymentDialog>
       _selectedPaymentMethod = method;
     });
 
+    // For cash payment, validate amount
+    if (method == 'cash') {
+      final paidAmount =
+          double.tryParse(
+            _cashController.text.replaceAll(',', '').replaceAll('.', ''),
+          ) ??
+          0.0;
+      if (paidAmount < widget.total) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Jumlah uang tidak cukup!'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        setState(() {
+          _selectedPaymentMethod = null;
+        });
+        return;
+      }
+      _paidAmount = paidAmount;
+      _change = paidAmount - widget.total;
+    } else {
+      _paidAmount = widget.total;
+      _change = 0.0;
+    }
+
     // Simulate payment processing
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         Navigator.of(context).pop();
-        widget.onPaymentComplete(method);
+        widget.onPaymentComplete(method, _paidAmount, _change);
       }
     });
   }
@@ -283,8 +314,96 @@ class _PaymentDialogState extends State<PaymentDialog>
                   ),
                 ),
 
-                // Footer
-                if (_selectedPaymentMethod != null)
+                // Cash input for cash payment
+                if (_selectedPaymentMethod == 'cash')
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Jumlah Uang Tunai',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _cashController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan jumlah uang',
+                            prefixText: 'Rp ',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surface,
+                          ),
+                          onChanged: (value) {
+                            final paidAmount =
+                                double.tryParse(
+                                  value.replaceAll(',', '').replaceAll('.', ''),
+                                ) ??
+                                0.0;
+                            setState(() {
+                              _paidAmount = paidAmount;
+                              _change = paidAmount - widget.total;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total: Rp ${widget.total.toStringAsFixed(0)}',
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                            Text(
+                              'Kembalian: Rp ${_change.toStringAsFixed(0)}',
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: _change >= 0
+                                        ? Colors.green
+                                        : Colors.red,
+                                  ),
+                            ),
+                          ],
+                        ),
+                        if (_change < 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'Uang kurang Rp ${(-_change).toStringAsFixed(0)}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                // Processing footer
+                if (_selectedPaymentMethod != null &&
+                    _selectedPaymentMethod != 'cash')
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(

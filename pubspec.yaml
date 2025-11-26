@@ -35,6 +35,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # Printing and PDF generation
+  printing: ^5.12.0
+  pdf: ^3.10.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

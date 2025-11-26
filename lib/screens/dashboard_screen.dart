@@ -166,6 +166,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                               child: InkWell(
                                 onTap: () => _navigateToScreen(item['screen']),
                                 borderRadius: BorderRadius.circular(16),
+                                splashColor: item['color'].withOpacity(0.1),
+                                highlightColor: item['color'].withOpacity(0.05),
                                 child: Padding(
                                   padding: const EdgeInsets.all(20.0),
                                   child: Row(

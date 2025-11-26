@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import '../services/print_service.dart';
 
 class ReceiptDialog extends StatefulWidget {
   final List<Map<String, dynamic>> cartItems;
   final double total;
   final String paymentMethod;
   final String transactionId;
+  final double paidAmount;
+  final double change;
 
   const ReceiptDialog({
     super.key,
@@ -12,6 +15,8 @@ class ReceiptDialog extends StatefulWidget {
     required this.total,
     required this.paymentMethod,
     required this.transactionId,
+    required this.paidAmount,
+    required this.change,
   });
 
   @override
@@ -271,6 +276,57 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                           ],
                         ),
 
+                        const SizedBox(height: 8),
+
+                        // Cash payment details (only show for cash payments)
+                        if (widget.paymentMethod == 'cash') ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Uang Dibayar',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                              Text(
+                                'Rp ${widget.paidAmount.toStringAsFixed(0)}',
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Kembalian',
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.change >= 0
+                                          ? Colors.green.shade600
+                                          : Colors.red.shade600,
+                                    ),
+                              ),
+                              Text(
+                                'Rp ${widget.change.toStringAsFixed(0)}',
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: widget.change >= 0
+                                          ? Colors.green.shade600
+                                          : Colors.red.shade600,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ],
+
                         const SizedBox(height: 24),
 
                         // Thank you message
@@ -317,29 +373,90 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                       bottomRight: Radius.circular(20),
                     ),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            // Print receipt functionality could be added here
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Fitur print akan segera hadir'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await PrintService.printReceipt(
+                                    cartItems: widget.cartItems,
+                                    total: widget.total,
+                                    paymentMethod: widget.paymentMethod,
+                                    transactionId: widget.transactionId,
+                                    paidAmount: widget.paidAmount,
+                                    change: widget.change,
+                                  );
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Struk berhasil dikirim ke printer',
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Gagal print struk: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.print),
+                              label: const Text('Print'),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                            );
-                          },
-                          icon: const Icon(Icons.print),
-                          label: const Text('Print'),
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await PrintService.shareReceipt(
+                                    cartItems: widget.cartItems,
+                                    total: widget.total,
+                                    paymentMethod: widget.paymentMethod,
+                                    transactionId: widget.transactionId,
+                                    paidAmount: widget.paidAmount,
+                                    change: widget.change,
+                                  );
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Gagal share struk: $e'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.share),
+                              label: const Text('Share'),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.check),
