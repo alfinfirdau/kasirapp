@@ -331,10 +331,199 @@ class ProductData {
         category: 'Snack',
         stock: 35,
       ),
+      Product.dummy(
+        id: '23',
+        name: 'Facial Cleanser',
+        description:
+            'Pembersih wajah dengan ekstrak aloe vera untuk kulit bersih dan segar',
+        price: 45000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+        category: 'Skincare',
+        stock: 25,
+      ),
+      Product.dummy(
+        id: '24',
+        name: 'Moisturizing Cream',
+        description:
+            'Krim pelembab dengan hyaluronic acid untuk hidrasi maksimal',
+        price: 65000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400',
+        category: 'Skincare',
+        stock: 20,
+      ),
+      Product.dummy(
+        id: '25',
+        name: 'Sunscreen SPF 50',
+        description:
+            'Tabir surya dengan SPF 50 untuk perlindungan maksimal dari sinar UV',
+        price: 55000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?w=400',
+        category: 'Skincare',
+        stock: 30,
+      ),
+      Product.dummy(
+        id: '26',
+        name: 'Vitamin C Serum',
+        description:
+            'Serum vitamin C untuk mencerahkan dan meratakan warna kulit',
+        price: 75000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400',
+        category: 'Skincare',
+        stock: 15,
+      ),
+      Product.dummy(
+        id: '27',
+        name: 'Night Cream',
+        description:
+            'Krim malam dengan retinol untuk regenerasi sel kulit saat tidur',
+        price: 85000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400',
+        category: 'Skincare',
+        stock: 18,
+      ),
+      Product.dummy(
+        id: '28',
+        name: 'Eye Cream',
+        description: 'Krim mata untuk mengurangi kantung mata dan garis halus',
+        price: 60000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400',
+        category: 'Skincare',
+        stock: 22,
+      ),
+      Product.dummy(
+        id: '29',
+        name: 'Toner',
+        description: 'Toner dengan green tea untuk menyeimbangkan pH kulit',
+        price: 35000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?w=400',
+        category: 'Skincare',
+        stock: 28,
+      ),
+      Product.dummy(
+        id: '30',
+        name: 'Face Mask',
+        description: 'Masker wajah dengan charcoal untuk detoksifikasi kulit',
+        price: 25000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400',
+        category: 'Skincare',
+        stock: 40,
+      ),
+      Product.dummy(
+        id: '31',
+        name: 'Kaos Polos Wanita',
+        description:
+            'Kaos polos katun premium untuk wanita dengan potongan pas',
+        price: 75000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+        category: 'Pakaian',
+        stock: 25,
+      ),
+      Product.dummy(
+        id: '32',
+        name: 'Blouse Chiffon Wanita',
+        description:
+            'Blouse chiffon elegan dengan motif floral untuk acara formal',
+        price: 125000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400',
+        category: 'Pakaian',
+        stock: 15,
+      ),
+      Product.dummy(
+        id: '33',
+        name: 'Celana Jeans Wanita',
+        description: 'Celana jeans slim fit dengan bahan berkualitas tinggi',
+        price: 150000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400',
+        category: 'Pakaian',
+        stock: 20,
+      ),
+      Product.dummy(
+        id: '34',
+        name: 'Dress Midi Wanita',
+        description: 'Dress midi dengan desain modern dan bahan nyaman',
+        price: 180000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400',
+        category: 'Pakaian',
+        stock: 12,
+      ),
+      Product.dummy(
+        id: '35',
+        name: 'Kaos Polos Pria',
+        description:
+            'Kaos polos katun combed untuk pria dengan potongan regular',
+        price: 65000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+        category: 'Pakaian',
+        stock: 30,
+      ),
+      Product.dummy(
+        id: '36',
+        name: 'Kemeja Formal Pria',
+        description: 'Kemeja formal dengan bahan cotton premium untuk kantor',
+        price: 135000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400',
+        category: 'Pakaian',
+        stock: 18,
+      ),
+      Product.dummy(
+        id: '37',
+        name: 'Celana Chinos Pria',
+        description: 'Celana chinos dengan bahan berkualitas dan potongan slim',
+        price: 140000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400',
+        category: 'Pakaian',
+        stock: 22,
+      ),
+      Product.dummy(
+        id: '38',
+        name: 'Jaket Casual Pria',
+        description: 'Jaket casual dengan bahan denim untuk gaya santai',
+        price: 200000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400',
+        category: 'Pakaian',
+        stock: 10,
+      ),
+      Product.dummy(
+        id: '39',
+        name: 'Rok Mini Wanita',
+        description: 'Rok mini dengan bahan spandex yang elastis dan nyaman',
+        price: 95000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1583496661160-fb5886a6aaaa?w=400',
+        category: 'Pakaian',
+        stock: 16,
+      ),
+      Product.dummy(
+        id: '40',
+        name: 'Sweater Hoodie Unisex',
+        description:
+            'Sweater hoodie dengan bahan fleece yang hangat dan nyaman',
+        price: 110000,
+        imageUrl:
+            'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+        category: 'Pakaian',
+        stock: 28,
+      ),
     ];
   }
 
   static List<String> getCategories() {
-    return ['Semua', 'Makanan', 'Minuman', 'Snack'];
+    return ['Semua', 'Makanan', 'Minuman', 'Snack', 'Skincare', 'Pakaian'];
   }
 }

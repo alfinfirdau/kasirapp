@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'qris_dialog.dart';
 
 class PaymentMethod {
   final String name;
@@ -123,6 +124,23 @@ class _PaymentDialogState extends State<PaymentDialog>
     setState(() {
       _selectedPaymentMethod = method;
     });
+
+    // Special handling for QRIS
+    if (method == 'qris') {
+      // Close current dialog and show QRIS dialog
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => QrisDialog(
+          amount: widget.total,
+          onPaymentComplete: () {
+            widget.onPaymentComplete(method, widget.total, 0.0);
+          },
+        ),
+      );
+      return;
+    }
 
     // For cash payment, validate amount
     if (method == 'cash') {

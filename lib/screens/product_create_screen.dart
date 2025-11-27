@@ -18,7 +18,13 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
   String _selectedCategory = 'Makanan';
   bool _isAvailable = true;
 
-  final List<String> _categories = ['Makanan', 'Minuman', 'Snack'];
+  final List<String> _categories = [
+    'Makanan',
+    'Minuman',
+    'Snack',
+    'Skincare',
+    'Pakaian',
+  ];
 
   @override
   void dispose() {
