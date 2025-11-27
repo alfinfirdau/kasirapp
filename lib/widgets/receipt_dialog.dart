@@ -413,6 +413,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                               icon: const Icon(Icons.print),
                               label: const Text('Print'),
                               style: OutlinedButton.styleFrom(
+                                textStyle: const TextStyle(fontSize: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -446,6 +447,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                               icon: const Icon(Icons.share),
                               label: const Text('Share'),
                               style: OutlinedButton.styleFrom(
+                                textStyle: const TextStyle(fontSize: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -482,16 +484,15 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                                 Icons.message,
                                 color: Color(0xFF25D366),
                               ),
-                              label: const Text(
-                                'WhatsApp',
-                                style: TextStyle(
-                                  color: Color(0xFF25D366),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              label: const Text('WhatsApp'),
                               style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF25D366),
                                 side: const BorderSide(
                                   color: Color(0xFF25D366),
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),

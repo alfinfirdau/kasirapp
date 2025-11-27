@@ -352,8 +352,8 @@ class PrintService {
     required double change,
   }) async {
     try {
-      // Generate receipt text
-      final receiptText = _generateReceiptText(
+      // Generate PDF receipt
+      final pdfBytes = await generateReceiptPdf(
         cartItems: cartItems,
         total: total,
         paymentMethod: paymentMethod,
@@ -362,23 +362,19 @@ class PrintService {
         change: change,
       );
 
-      // Encode the text for URL
-      final encodedText = Uri.encodeComponent(receiptText);
+      // Create XFile from PDF bytes
+      final pdfFile = XFile.fromData(
+        pdfBytes,
+        name: 'Receipt_$transactionId.pdf',
+        mimeType: 'application/pdf',
+      );
 
-      // WhatsApp URL scheme
-      final whatsappUrl = 'whatsapp://send?text=$encodedText';
-
-      final uri = Uri.parse(whatsappUrl);
-
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        // Fallback to share_plus if WhatsApp is not installed
-        await Share.share(
-          receiptText,
-          subject: 'Struk Pembayaran - $transactionId',
-        );
-      }
+      // Share PDF to WhatsApp
+      await Share.shareXFiles(
+        [pdfFile],
+        text: 'Struk Pembayaran - $transactionId',
+        subject: 'Struk Pembayaran - $transactionId',
+      );
     } catch (e) {
       throw Exception('Failed to share receipt to WhatsApp: $e');
     }
