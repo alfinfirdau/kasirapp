@@ -2,6 +2,8 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PrintService {
   static Future<Uint8List> generateReceiptPdf({
@@ -339,6 +341,103 @@ class PrintService {
     } catch (e) {
       throw Exception('Failed to share receipt: $e');
     }
+  }
+
+  static Future<void> shareReceiptToWhatsApp({
+    required List<Map<String, dynamic>> cartItems,
+    required double total,
+    required String paymentMethod,
+    required String transactionId,
+    required double paidAmount,
+    required double change,
+  }) async {
+    try {
+      // Generate receipt text
+      final receiptText = _generateReceiptText(
+        cartItems: cartItems,
+        total: total,
+        paymentMethod: paymentMethod,
+        transactionId: transactionId,
+        paidAmount: paidAmount,
+        change: change,
+      );
+
+      // Encode the text for URL
+      final encodedText = Uri.encodeComponent(receiptText);
+
+      // WhatsApp URL scheme
+      final whatsappUrl = 'whatsapp://send?text=$encodedText';
+
+      final uri = Uri.parse(whatsappUrl);
+
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        // Fallback to share_plus if WhatsApp is not installed
+        await Share.share(
+          receiptText,
+          subject: 'Struk Pembayaran - $transactionId',
+        );
+      }
+    } catch (e) {
+      throw Exception('Failed to share receipt to WhatsApp: $e');
+    }
+  }
+
+  static String _generateReceiptText({
+    required List<Map<String, dynamic>> cartItems,
+    required double total,
+    required String paymentMethod,
+    required String transactionId,
+    required double paidAmount,
+    required double change,
+  }) {
+    final buffer = StringBuffer();
+
+    // Header
+    buffer.writeln('🧾 *KASIR APP*');
+    buffer.writeln('Struk Pembayaran');
+    buffer.writeln('Tanggal: ${DateTime.now().toString().split('.')[0]}');
+    buffer.writeln('ID Transaksi: $transactionId');
+    buffer.writeln('');
+    buffer.writeln('═══════════════════════════════');
+
+    // Items header
+    buffer.writeln('📦 ITEM YANG DIBELI:');
+    buffer.writeln('');
+
+    // Items list with better formatting
+    for (final item in cartItems) {
+      final itemName = item['name'].toString();
+      final quantity = item['quantity'].toString();
+      final price =
+          'Rp ${(item['price'] * item['quantity']).toStringAsFixed(0)}';
+
+      // Format: Item Name xQty - Price
+      buffer.writeln('$itemName x$quantity - $price');
+    }
+
+    buffer.writeln('');
+    buffer.writeln('═══════════════════════════════');
+
+    // Total
+    buffer.writeln('💰 TOTAL: Rp ${total.toStringAsFixed(0)}');
+    buffer.writeln(
+      'Metode Pembayaran: ${_getPaymentMethodDisplayName(paymentMethod)}',
+    );
+
+    // Cash payment details
+    if (paymentMethod == 'cash') {
+      buffer.writeln('Uang Dibayar: Rp ${paidAmount.toStringAsFixed(0)}');
+      buffer.writeln('Kembalian: Rp ${change.toStringAsFixed(0)}');
+    }
+
+    buffer.writeln('');
+    buffer.writeln('═══════════════════════════════');
+    buffer.writeln('🙏 Terima Kasih Atas Kunjungan Anda!');
+    buffer.writeln('Simpan struk ini sebagai bukti pembayaran.');
+
+    return buffer.toString();
   }
 
   static String _getPaymentMethodDisplayName(String method) {

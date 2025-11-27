@@ -419,7 +419,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () async {
@@ -446,6 +446,53 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                               icon: const Icon(Icons.share),
                               label: const Text('Share'),
                               style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () async {
+                                try {
+                                  await PrintService.shareReceiptToWhatsApp(
+                                    cartItems: widget.cartItems,
+                                    total: widget.total,
+                                    paymentMethod: widget.paymentMethod,
+                                    transactionId: widget.transactionId,
+                                    paidAmount: widget.paidAmount,
+                                    change: widget.change,
+                                  );
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Gagal share ke WhatsApp: $e',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.message,
+                                color: Color(0xFF25D366),
+                              ),
+                              label: const Text(
+                                'WhatsApp',
+                                style: TextStyle(
+                                  color: Color(0xFF25D366),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xFF25D366),
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
