@@ -12,6 +12,7 @@ class POSScreen extends StatefulWidget {
 
 class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
   final List<Map<String, dynamic>> _cartItems = [];
+  final TextEditingController _customerNameController = TextEditingController();
   double _total = 0;
   late AnimationController _fabAnimationController;
   late Animation<double> _fabScaleAnimation;
@@ -31,6 +32,7 @@ class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _fabAnimationController.dispose();
+    _customerNameController.dispose();
     super.dispose();
   }
 
@@ -80,15 +82,17 @@ class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
     double change,
   ) {
     final transactionId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
+    final customerName = _customerNameController.text.trim();
 
     // Store cart data before clearing
     final cartSnapshot = List<Map<String, dynamic>>.from(_cartItems);
     final totalSnapshot = _total;
 
-    // Clear cart
+    // Clear cart and customer name
     setState(() {
       _cartItems.clear();
       _total = 0;
+      _customerNameController.clear();
     });
 
     // Show receipt
@@ -102,6 +106,7 @@ class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
         transactionId: transactionId,
         paidAmount: paidAmount,
         change: change,
+        customerName: customerName,
       ),
     );
   }
@@ -280,27 +285,56 @@ class _POSScreenState extends State<POSScreen> with TickerProviderStateMixin {
                               topLeft: Radius.circular(20),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Keranjang',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
-                                    ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Keranjang',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
+                                        ),
+                                  ),
+                                  Text(
+                                    '${_cartItems.length} item',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
+                                        ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                '${_cartItems.length} item',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
-                                    ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                controller: _customerNameController,
+                                decoration: InputDecoration(
+                                  hintText: 'Nama Customer (Opsional)',
+                                  prefixIcon: const Icon(Icons.person_outline),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  filled: true,
+                                  fillColor: Theme.of(
+                                    context,
+                                  ).colorScheme.surface.withOpacity(0.8),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                ),
                               ),
                             ],
                           ),

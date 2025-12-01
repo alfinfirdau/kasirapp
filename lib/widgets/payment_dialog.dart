@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'qris_dialog.dart';
 
 class PaymentMethod {
@@ -120,6 +121,49 @@ class _PaymentDialogState extends State<PaymentDialog>
     super.dispose();
   }
 
+  String _formatCurrency(String value) {
+    if (value.isEmpty) return '';
+    final number = int.tryParse(value.replaceAll(',', '')) ?? 0;
+    return _formatNumber(number);
+  }
+
+  String _formatNumber(int number) {
+    return number.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (Match match) => '${match[1]},',
+    );
+  }
+
+  Widget _buildQuickAmountButton(int amount, String label) {
+    return SizedBox(
+      width: 70,
+      height: 36,
+      child: OutlinedButton(
+        onPressed: () {
+          final formattedAmount = _formatNumber(amount);
+          _cashController.text = formattedAmount;
+          setState(() {
+            _paidAmount = amount.toDouble();
+            _change = amount.toDouble() - widget.total;
+          });
+        },
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+          ),
+        ),
+        child: Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+
   void _processPayment(String method) {
     setState(() {
       _selectedPaymentMethod = method;
@@ -142,28 +186,27 @@ class _PaymentDialogState extends State<PaymentDialog>
       return;
     }
 
-    // For cash payment, validate amount
+    // For cash payment, allow payment even if amount is insufficient
     if (method == 'cash') {
       final paidAmount =
-          double.tryParse(
-            _cashController.text.replaceAll(',', '').replaceAll('.', ''),
-          ) ??
-          0.0;
+          double.tryParse(_cashController.text.replaceAll(',', '')) ?? 0.0;
+
+      _paidAmount = paidAmount;
+      _change = paidAmount - widget.total;
+
+      // Allow payment even if insufficient, but show warning
       if (paidAmount < widget.total) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Jumlah uang tidak cukup!'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text(
+              'Peringatan: Uang kurang Rp ${(-_change).toStringAsFixed(0)}',
+            ),
+            backgroundColor: Colors.orange.shade600,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
-        setState(() {
-          _selectedPaymentMethod = null;
-        });
-        return;
       }
-      _paidAmount = paidAmount;
-      _change = paidAmount - widget.total;
     } else {
       _paidAmount = widget.total;
       _change = 0.0;
@@ -358,63 +401,304 @@ class _PaymentDialogState extends State<PaymentDialog>
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
+
+                        // Quick amount buttons
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _buildQuickAmountButton(50000, '50rb'),
+                            _buildQuickAmountButton(100000, '100rb'),
+                            _buildQuickAmountButton(150000, '150rb'),
+                            _buildQuickAmountButton(200000, '200rb'),
+                            _buildQuickAmountButton(500000, '500rb'),
+                            _buildQuickAmountButton(1000000, '1jt'),
+                            SizedBox(
+                              width: 70,
+                              height: 36,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  // Set exact amount
+                                  final exactAmount = widget.total.ceil();
+                                  final formattedAmount = _formatNumber(
+                                    exactAmount,
+                                  );
+                                  _cashController.text = formattedAmount;
+                                  setState(() {
+                                    _paidAmount = exactAmount.toDouble();
+                                    _change = 0.0;
+                                  });
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  side: BorderSide(
+                                    color: Colors.green.shade600,
+                                  ),
+                                  foregroundColor: Colors.green.shade600,
+                                ),
+                                child: Text(
+                                  'Pas',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 70,
+                              height: 36,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  _cashController.clear();
+                                  setState(() {
+                                    _paidAmount = 0.0;
+                                    _change = -widget.total;
+                                  });
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  side: BorderSide(color: Colors.red.shade400),
+                                  foregroundColor: Colors.red.shade400,
+                                ),
+                                child: Text(
+                                  'Clear',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
                         TextField(
                           controller: _cashController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: false,
+                            signed: false,
+                          ),
+                          maxLength: 15, // Allow up to 15 digits (trillions)
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            TextInputFormatter.withFunction((
+                              oldValue,
+                              newValue,
+                            ) {
+                              // Remove any existing commas and format the new value
+                              final cleanValue = newValue.text.replaceAll(
+                                ',',
+                                '',
+                              );
+                              if (cleanValue.isEmpty) return newValue;
+
+                              final formatted = _formatCurrency(cleanValue);
+                              return TextEditingValue(
+                                text: formatted,
+                                selection: TextSelection.collapsed(
+                                  offset: formatted.length,
+                                ),
+                              );
+                            }),
+                          ],
                           decoration: InputDecoration(
-                            hintText: 'Masukkan jumlah uang',
+                            hintText: 'Masukkan jumlah uang (contoh: 100000)',
                             prefixText: 'Rp ',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             filled: true,
                             fillColor: Theme.of(context).colorScheme.surface,
+                            counterText: '', // Hide character counter
                           ),
                           onChanged: (value) {
+                            final cleanValue = value.replaceAll(',', '');
                             final paidAmount =
-                                double.tryParse(
-                                  value.replaceAll(',', '').replaceAll('.', ''),
-                                ) ??
-                                0.0;
+                                double.tryParse(cleanValue) ?? 0.0;
                             setState(() {
                               _paidAmount = paidAmount;
                               _change = paidAmount - widget.total;
                             });
                           },
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Total: Rp ${widget.total.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(fontWeight: FontWeight.w500),
+                        const SizedBox(height: 16),
+
+                        // Payment Summary Card
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.3),
                             ),
-                            Text(
-                              'Kembalian: Rp ${_change.toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: _change >= 0
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        if (_change < 0)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              'Uang kurang Rp ${(-_change).toStringAsFixed(0)}',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
+                          child: Column(
+                            children: [
+                              // Total Amount
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Total Tagihan',
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                  Text(
+                                    'Rp ${widget.total.toStringAsFixed(0)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Paid Amount
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Uang Dibayar',
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                  Text(
+                                    'Rp ${_paidAmount.toStringAsFixed(0)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: _paidAmount >= widget.total
+                                              ? Colors.green.shade600
+                                              : Colors.orange.shade600,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Change Amount
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: _change >= 0
+                                      ? Colors.green.shade50
+                                      : Colors.red.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: _change >= 0
+                                        ? Colors.green.shade200
+                                        : Colors.red.shade200,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          _change >= 0
+                                              ? Icons.arrow_downward
+                                              : Icons.warning,
+                                          color: _change >= 0
+                                              ? Colors.green.shade600
+                                              : Colors.red.shade600,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          _change >= 0 ? 'Kembalian' : 'Kurang',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: _change >= 0
+                                                    ? Colors.green.shade600
+                                                    : Colors.red.shade600,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      'Rp ${_change.abs().toStringAsFixed(0)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: _change >= 0
+                                                ? Colors.green.shade600
+                                                : Colors.red.shade600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              if (_change < 0) ...[
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.red.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.red.shade600,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Uang yang dibayarkan kurang Rp ${(-_change).toStringAsFixed(0)}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Colors.red.shade600,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),

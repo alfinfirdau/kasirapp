@@ -8,6 +8,7 @@ class ReceiptDialog extends StatefulWidget {
   final String transactionId;
   final double paidAmount;
   final double change;
+  final String customerName;
 
   const ReceiptDialog({
     super.key,
@@ -17,6 +18,7 @@ class ReceiptDialog extends StatefulWidget {
     required this.transactionId,
     required this.paidAmount,
     required this.change,
+    this.customerName = '',
   });
 
   @override
@@ -183,7 +185,26 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
+
+                        // Customer name (if provided)
+                        if (widget.customerName.isNotEmpty) ...[
+                          Center(
+                            child: Text(
+                              'Customer: ${widget.customerName}',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        const SizedBox(height: 8),
                         const Divider(),
 
                         // Items list
@@ -258,74 +279,191 @@ class _ReceiptDialogState extends State<ReceiptDialog>
 
                         const SizedBox(height: 8),
 
-                        // Payment method
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Metode Pembayaran',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                        // Payment details section
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.2),
                             ),
-                            Text(
-                              _getPaymentMethodDisplayName(
-                                widget.paymentMethod,
-                              ),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Cash payment details (only show for cash payments)
-                        if (widget.paymentMethod == 'cash') ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Uang Dibayar',
-                                style: Theme.of(context).textTheme.bodyMedium
+                                'Detail Pembayaran',
+                                style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(
+                                      fontWeight: FontWeight.bold,
                                       color: Theme.of(
                                         context,
-                                      ).colorScheme.onSurfaceVariant,
+                                      ).colorScheme.primary,
                                     ),
                               ),
-                              Text(
-                                'Rp ${widget.paidAmount.toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              const SizedBox(height: 12),
+
+                              // Payment method
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Metode',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
+                                  Text(
+                                    _getPaymentMethodDisplayName(
+                                      widget.paymentMethod,
+                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                ],
                               ),
+
+                              const SizedBox(height: 8),
+
+                              // Cash payment details (only show for cash payments)
+                              if (widget.paymentMethod == 'cash') ...[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Uang Dibayar',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                    Text(
+                                      'Rp ${widget.paidAmount.toStringAsFixed(0)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                // Change amount with special styling
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: widget.change >= 0
+                                        ? Colors.green.shade50
+                                        : Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: widget.change >= 0
+                                          ? Colors.green.shade200
+                                          : Colors.red.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            widget.change >= 0
+                                                ? Icons.arrow_downward
+                                                : Icons.warning,
+                                            color: widget.change >= 0
+                                                ? Colors.green.shade600
+                                                : Colors.red.shade600,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            widget.change >= 0
+                                                ? 'Kembalian'
+                                                : 'Kurang Bayar',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleSmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: widget.change >= 0
+                                                      ? Colors.green.shade600
+                                                      : Colors.red.shade600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        'Rp ${widget.change.abs().toStringAsFixed(0)}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: widget.change >= 0
+                                                  ? Colors.green.shade600
+                                                  : Colors.red.shade600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else ...[
+                                // For non-cash payments
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Status',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green.shade100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        'Lunas',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Colors.green.shade700,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Kembalian',
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: widget.change >= 0
-                                          ? Colors.green.shade600
-                                          : Colors.red.shade600,
-                                    ),
-                              ),
-                              Text(
-                                'Rp ${widget.change.toStringAsFixed(0)}',
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: widget.change >= 0
-                                          ? Colors.green.shade600
-                                          : Colors.red.shade600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
 
                         const SizedBox(height: 24),
 
@@ -388,6 +526,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                                     transactionId: widget.transactionId,
                                     paidAmount: widget.paidAmount,
                                     change: widget.change,
+                                    customerName: widget.customerName,
                                   );
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -432,6 +571,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                                     transactionId: widget.transactionId,
                                     paidAmount: widget.paidAmount,
                                     change: widget.change,
+                                    customerName: widget.customerName,
                                   );
                                 } catch (e) {
                                   if (mounted) {
@@ -466,6 +606,7 @@ class _ReceiptDialogState extends State<ReceiptDialog>
                                     transactionId: widget.transactionId,
                                     paidAmount: widget.paidAmount,
                                     change: widget.change,
+                                    customerName: widget.customerName,
                                   );
                                 } catch (e) {
                                   if (mounted) {

@@ -42,6 +42,7 @@ class Transaction {
   final double payment;
   final double change;
   final String paymentMethod;
+  final String customerName;
 
   const Transaction({
     required this.id,
@@ -51,6 +52,7 @@ class Transaction {
     required this.payment,
     required this.change,
     required this.paymentMethod,
+    this.customerName = '',
   });
 
   factory Transaction.fromMap(Map<String, dynamic> map) {
@@ -66,6 +68,7 @@ class Transaction {
       payment: (map['payment'] ?? 0.0).toDouble(),
       change: (map['change'] ?? 0.0).toDouble(),
       paymentMethod: map['paymentMethod'] ?? 'Cash',
+      customerName: map['customerName'] ?? '',
     );
   }
 
@@ -78,6 +81,7 @@ class Transaction {
       'payment': payment,
       'change': change,
       'paymentMethod': paymentMethod,
+      'customerName': customerName,
     };
   }
 }

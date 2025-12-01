@@ -13,6 +13,7 @@ class PrintService {
     required String transactionId,
     required double paidAmount,
     required double change,
+    String customerName = '',
   }) async {
     final pdf = pw.Document();
 
@@ -80,7 +81,32 @@ class PrintService {
                   ],
                 ),
 
-                pw.SizedBox(height: 20),
+                pw.SizedBox(height: 8),
+
+                // Customer name (if provided)
+                if (customerName.isNotEmpty) ...[
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'Customer:',
+                        style: pw.TextStyle(font: font, fontSize: 12),
+                      ),
+                      pw.Text(
+                        customerName,
+                        style: pw.TextStyle(
+                          font: font,
+                          fontSize: 12,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 12),
+                ] else ...[
+                  pw.SizedBox(height: 12),
+                ],
 
                 // Items header
                 pw.Container(
@@ -296,6 +322,7 @@ class PrintService {
     required String transactionId,
     required double paidAmount,
     required double change,
+    String customerName = '',
   }) async {
     try {
       final pdfBytes = await generateReceiptPdf(
@@ -305,6 +332,7 @@ class PrintService {
         transactionId: transactionId,
         paidAmount: paidAmount,
         change: change,
+        customerName: customerName,
       );
 
       await Printing.layoutPdf(
@@ -323,6 +351,7 @@ class PrintService {
     required String transactionId,
     required double paidAmount,
     required double change,
+    String customerName = '',
   }) async {
     try {
       final pdfBytes = await generateReceiptPdf(
@@ -332,6 +361,7 @@ class PrintService {
         transactionId: transactionId,
         paidAmount: paidAmount,
         change: change,
+        customerName: customerName,
       );
 
       await Printing.sharePdf(
@@ -350,6 +380,7 @@ class PrintService {
     required String transactionId,
     required double paidAmount,
     required double change,
+    String customerName = '',
   }) async {
     try {
       // Generate PDF receipt
@@ -360,6 +391,7 @@ class PrintService {
         transactionId: transactionId,
         paidAmount: paidAmount,
         change: change,
+        customerName: customerName,
       );
 
       // Create XFile from PDF bytes
